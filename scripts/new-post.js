@@ -20,26 +20,26 @@ Usage: npm run new-post -- <filename>`)
   process.exit(1) // Terminate the script and return error code 1
 }
 
-let fileName = args[0]
+let folderName = args[0]
 
-// Add .md extension if not present
+// Remove any .md extension since we'll create a folder with index.md
 const fileExtensionRegex = /\.(md|mdx)$/i
-if (!fileExtensionRegex.test(fileName)) {
-  fileName += ".md"
+if (fileExtensionRegex.test(folderName)) {
+  folderName = folderName.replace(fileExtensionRegex, "")
 }
 
 const targetDir = "./src/content/posts/"
-const fullPath = path.join(targetDir, fileName)
+const fullPath = path.join(targetDir, folderName, "index.md")
+const folderPath = path.join(targetDir, folderName)
 
 if (fs.existsSync(fullPath)) {
   console.error(`Error: File ${fullPath} already exists `)
   process.exit(1)
 }
 
-// recursive mode creates multi-level directories
-const dirPath = path.dirname(fullPath)
-if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true })
+// Create the folder for the post
+if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true })
 }
 
 const content = `---
@@ -47,6 +47,7 @@ title: ${args[0]}
 published: ${getDate()}
 description: ''
 image: ''
+showImageInline: false
 tags: []
 category: ''
 draft: false 
@@ -54,6 +55,6 @@ lang: ''
 ---
 `
 
-fs.writeFileSync(path.join(targetDir, fileName), content)
+fs.writeFileSync(fullPath, content)
 
 console.log(`Post ${fullPath} created`)
